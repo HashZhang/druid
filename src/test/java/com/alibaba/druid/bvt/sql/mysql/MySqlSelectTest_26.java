@@ -22,44 +22,21 @@ import org.junit.Assert;
 import com.alibaba.druid.sql.MysqlTest;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSelect;
-import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 
-public class MySqlSelectTest_update extends MysqlTest {
+public class MySqlSelectTest_26 extends MysqlTest {
 
     public void test_0() throws Exception {
-        String sql = "select current_no from "
-                     + "update wlb_waybill_branch_rule  set current_no = current_no + ? ,gmt_modified = now()   "
-                     + "where id = ? and status = ? and end_no > current_no " 
-                     + "order by current_no desc "
-                     + "limit 10";
+        String sql = "select truncate(12.0123,2);";
 
+        
         MySqlStatementParser parser = new MySqlStatementParser(sql);
         List<SQLStatement> statementList = parser.parseStatementList();
         SQLStatement stmt = statementList.get(0);
-
-        MySqlUpdateStatement updateStmt = (MySqlUpdateStatement) stmt;
-
-        print(statementList);
+//        print(statementList);
 
         Assert.assertEquals(1, statementList.size());
-        
-        String output = SQLUtils.toMySqlString(stmt);
-        
-        String expected = "SELECT current_no"
-                + "\nFROM UPDATE wlb_waybill_branch_rule"
-                + "\nSET current_no = current_no + ?, gmt_modified = now()"
-                + "\nWHERE id = ?"
-                + "\n\tAND status = ?"
-                + "\n\tAND end_no > current_no"
-                + "\nORDER BY current_no DESC"
-                + "\nLIMIT 10";
-
-        Assert.assertEquals(expected, output);
 
         MySqlSchemaStatVisitor visitor = new MySqlSchemaStatVisitor();
         stmt.accept(visitor);
@@ -68,10 +45,24 @@ public class MySqlSelectTest_update extends MysqlTest {
 //        System.out.println("fields : " + visitor.getColumns());
 //        System.out.println("coditions : " + visitor.getConditions());
 //        System.out.println("orderBy : " + visitor.getOrderByColumns());
-
-        Assert.assertEquals(1, visitor.getTables().size());
-        Assert.assertEquals(5, visitor.getColumns().size());
-        Assert.assertEquals(4, visitor.getConditions().size());
+        
+        Assert.assertEquals(0, visitor.getTables().size());
+        Assert.assertEquals(0, visitor.getColumns().size());
+        Assert.assertEquals(0, visitor.getConditions().size());
         Assert.assertEquals(0, visitor.getOrderByColumns().size());
+        
+        {
+            String output = SQLUtils.toMySqlString(stmt);
+            Assert.assertEquals("SELECT truncate(12.0123, 2)", //
+                                output);
+        }
+        {
+            String output = SQLUtils.toMySqlString(stmt, SQLUtils.DEFAULT_LCASE_FORMAT_OPTION);
+            Assert.assertEquals("select truncate(12.0123, 2)", //
+                                output);
+        }
     }
+    
+    
+    
 }
